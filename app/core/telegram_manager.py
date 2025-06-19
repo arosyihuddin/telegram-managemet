@@ -38,7 +38,7 @@ class TelegramManager:
                     api_hash=api_hash,
                 )
 
-            await client.start()
+            await client.connect()
             TelegramManager.clients[key] = client
 
         else:

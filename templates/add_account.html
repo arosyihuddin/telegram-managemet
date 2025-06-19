@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Tambah Akun - Telegram Management{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Navigation Header -->
+    <nav class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="/dashboard" class="h-8 w-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fab fa-telegram-plane text-white text-sm"></i>
+                    </a>
+                    <h1 class="text-xl font-semibold text-gray-900">Tambah Akun Telegram</h1>
+                </div>
+                <a href="/dashboard" class="text-gray-600 hover:text-gray-900">
+                    <i class="fas fa-arrow-left mr-2"></i>Kembali
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-2xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-xl shadow-sm p-8 animate-fade-in">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Tambahkan Akun Telegram Baru</h2>
+                <p class="text-gray-600">Masukkan detail akun Telegram untuk memulai integrasi</p>
+            </div>
+
+            {% if error %}
+            <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+                    <span class="text-red-700">{{ error }}</span>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Information Card -->
+            <div class="mb-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
+                <div class="flex items-start">
+                    <i class="fas fa-info-circle text-blue-500 mr-3 mt-1"></i>
+                    <div class="text-sm text-blue-700">
+                        <h4 class="font-semibold mb-2">Cara mendapatkan API ID dan API Hash:</h4>
+                        <ol class="list-decimal list-inside space-y-1">
+                            <li>Kunjungi <a href="https://my.telegram.org" target="_blank" class="underline">my.telegram.org</a></li>
+                            <li>Login dengan nomor HP Telegram Anda</li>
+                            <li>Pilih "API Development Tools"</li>
+                            <li>Isi form aplikasi dan dapatkan API ID & API Hash</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <form method="post" action="/account/add" class="space-y-6">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-tag mr-2 text-gray-400"></i>Nama Akun
+                    </label>
+                    <input 
+                        type="text" 
+                        name="name" 
+                        id="name" 
+                        required 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        placeholder="Misal: Akun Marketing, Akun Support, dll"
+                    >
+                    <p class="text-xs text-gray-500 mt-1">Nama untuk mengidentifikasi akun ini di dashboard</p>
+                </div>
+
+                <div>
+                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-phone mr-2 text-gray-400"></i>Nomor Telepon
+                    </label>
+                    <input 
+                        type="text" 
+                        name="phone" 
+                        id="phone" 
+                        required 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        placeholder="+6281234567890"
+                    >
+                    <p class="text-xs text-gray-500 mt-1">Format internasional dengan kode negara (misal: +62 untuk Indonesia)</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="api_id" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-key mr-2 text-gray-400"></i>API ID
+                        </label>
+                        <input 
+                            type="text" 
+                            name="api_id" 
+                            id="api_id" 
+                            required 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                            placeholder="1234567"
+                        >
+                    </div>
+
+                    <div>
+                        <label for="api_hash" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-fingerprint mr-2 text-gray-400"></i>API Hash
+                        </label>
+                        <input 
+                            type="text" 
+                            name="api_hash" 
+                            id="api_hash" 
+                            required 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                            placeholder="abcdef1234567890abcdef1234567890"
+                        >
+                    </div>
+                </div>
+
+                <!-- Security Notice -->
+                <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div class="flex items-start">
+                        <i class="fas fa-shield-alt text-yellow-500 mr-2 mt-0.5"></i>
+                        <div class="text-sm text-yellow-800">
+                            <p class="font-medium mb-1">Keamanan Data</p>
+                            <p>API credentials Anda akan disimpan secara aman dan hanya digunakan untuk koneksi ke Telegram. Pastikan Anda hanya menggunakan API credentials milik Anda sendiri.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex space-x-4 pt-6">
+                    <button 
+                        type="submit" 
+                        class="flex-1 btn-primary text-white py-3 px-6 rounded-lg font-medium shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200"
+                    >
+                        <i class="fas fa-paper-plane mr-2"></i>Kirim Kode Verifikasi
+                    </button>
+                    <a 
+                        href="/dashboard" 
+                        class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200"
+                    >
+                        <i class="fas fa-times mr-2"></i>Batal
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

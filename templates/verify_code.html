@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Verifikasi Kode - Telegram Management{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Navigation Header -->
+    <nav class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="h-8 w-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fab fa-telegram-plane text-white text-sm"></i>
+                    </div>
+                    <h1 class="text-xl font-semibold text-gray-900">Verifikasi Kode</h1>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-md mx-auto py-16 px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-xl shadow-sm p-8 animate-fade-in">
+            <div class="text-center mb-8">
+                <div class="mx-auto h-16 w-16 bg-gradient-to-r from-green-400 to-green-600 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-sms text-white text-2xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Verifikasi Nomor Telepon</h2>
+                <p class="text-gray-600">Kode verifikasi telah dikirim ke:</p>
+                <p class="text-lg font-semibold text-blue-600 mt-1">{{ phone }}</p>
+            </div>
+
+            {% if message %}
+            <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                    <span class="text-green-700">{{ message }}</span>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if error %}
+            <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+                    <span class="text-red-700">{{ error }}</span>
+                </div>
+            </div>
+            {% endif %}
+
+            <form method="post" action="/account/verify" class="space-y-6">
+                <div>
+                    <label for="code" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-lock mr-2 text-gray-400"></i>Kode Verifikasi
+                    </label>
+                    <input 
+                        type="text" 
+                        name="code" 
+                        id="code" 
+                        required 
+                        maxlength="5"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-center text-2xl font-bold tracking-widest"
+                        placeholder="12345"
+                        autocomplete="off"
+                    >
+                    <p class="text-xs text-gray-500 mt-2 text-center">Masukkan kode 5 digit yang dikirim via SMS atau Telegram</p>
+                </div>
+
+                <button 
+                    type="submit" 
+                    class="w-full btn-primary text-white py-3 px-6 rounded-lg font-medium shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200"
+                >
+                    <i class="fas fa-check mr-2"></i>Verifikasi & Simpan Akun
+                </button>
+            </form>
+
+            <!-- Help Text -->
+            <div class="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div class="flex items-start">
+                    <i class="fas fa-question-circle text-blue-500 mr-2 mt-0.5"></i>
+                    <div class="text-sm text-blue-700">
+                        <p class="font-medium mb-1">Tidak menerima kode?</p>
+                        <ul class="text-xs space-y-1">
+                            <li>• Periksa SMS di nomor HP yang dimasukkan</li>
+                            <li>• Cek pesan di aplikasi Telegram</li>
+                            <li>• Pastikan nomor HP dalam format internasional</li>
+                            <li>• Tunggu beberapa menit sebelum mencoba lagi</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-6">
+                <a href="/account/add" class="text-sm text-gray-600 hover:text-gray-900">
+                    <i class="fas fa-arrow-left mr-1"></i>Kembali ke form pendaftaran
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto focus on code input
+document.getElementById('code').focus();
+
+// Auto format code input
+document.getElementById('code').addEventListener('input', function(e) {
+    // Remove non-numeric characters
+    this.value = this.value.replace(/[^0-9]/g, '');
+    
+    // Limit to 5 characters
+    if (this.value.length > 5) {
+        this.value = this.value.slice(0, 5);
+    }
+});
+
+// Auto submit when 5 digits entered
+document.getElementById('code').addEventListener('input', function(e) {
+    if (this.value.length === 5) {
+        // Optional: auto submit after short delay
+        setTimeout(() => {
+            if (this.value.length === 5) {
+                this.form.submit();
+            }
+        }, 500);
+    }
+});
+</script>
+{% endblock %}

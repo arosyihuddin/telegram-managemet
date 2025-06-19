@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}Events - {{ account.name }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Navigation Header -->
+    <nav class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="/dashboard" class="h-8 w-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fab fa-telegram-plane text-white text-sm"></i>
+                    </a>
+                    <div>
+                        <h1 class="text-xl font-semibold text-gray-900">Events: {{ account.name }}</h1>
+                        <p class="text-sm text-gray-600">{{ account.phone }}</p>
+                    </div>
+                </div>
+                <a href="/dashboard" class="text-gray-600 hover:text-gray-900">
+                    <i class="fas fa-arrow-left mr-2"></i>Kembali
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <!-- Add Event Form -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-8 animate-fade-in">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                <i class="fas fa-plus-circle mr-2 text-green-600"></i>Tambah Event Baru
+            </h3>
+            
+            <form method="post" action="/account/{{ account.id }}/events/add" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="event_type" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-cog mr-2 text-gray-400"></i>Jenis Event
+                        </label>
+                        <select 
+                            name="event_type" 
+                            id="event_type" 
+                            required 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        >
+                            <option value="">Pilih jenis event...</option>
+                            <option value="new_message">New Message</option>
+                            <option value="callback_query">Callback Query</option>
+                            <option value="inline_query">Inline Query</option>
+                            <option value="user_status">User Status</option>
+                            <option value="chat_member">Chat Member</option>
+                            <option value="message_edited">Message Edited</option>
+                            <option value="message_deleted">Message Deleted</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="targets" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-users mr-2 text-gray-400"></i>Target ID/Username
+                        </label>
+                        <input 
+                            type="text" 
+                            name="targets" 
+                            id="targets" 
+                            required 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                            placeholder="@username, 123456789, @channel"
+                        >
+                        <p class="text-xs text-gray-500 mt-1">Pisahkan multiple target dengan koma</p>
+                    </div>
+                </div>
+                
+                <button 
+                    type="submit" 
+                    class="btn-primary text-white px-6 py-3 rounded-lg font-medium shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200"
+                >
+                    <i class="fas fa-plus mr-2"></i>Tambah Event
+                </button>
+            </form>
+        </div>
+
+        <!-- Events List -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">
+                    <i class="fas fa-list mr-2 text-gray-600"></i>Daftar Events ({{ account.events|length }})
+                </h3>
+            </div>
+            
+            {% if account.events %}
+            <div class="divide-y divide-gray-200">
+                {% for event in account.events %}
+                <div class="p-6 hover:bg-gray-50 transition-colors">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
+                                    {% if event.event_type == 'new_message' %}bg-blue-100 text-blue-800{% endif %}
+                                    {% if event.event_type == 'callback_query' %}bg-green-100 text-green-800{% endif %}
+                                    {% if event.event_type == 'inline_query' %}bg-purple-100 text-purple-800{% endif %}
+                                    {% if event.event_type == 'user_status' %}bg-yellow-100 text-yellow-800{% endif %}
+                                    {% if event.event_type == 'chat_member' %}bg-indigo-100 text-indigo-800{% endif %}
+                                    {% if event.event_type == 'message_edited' %}bg-orange-100 text-orange-800{% endif %}
+                                    {% if event.event_type == 'message_deleted' %}bg-red-100 text-red-800{% endif %}
+                                ">
+                                    <i class="fas fa-bolt mr-1"></i>{{ event.event_type }}
+                                </span>
+                                
+                                <span class="text-sm text-gray-500">
+                                    Dibuat: {{ event.created_at[:10] if event.created_at else 'N/A' }}
+                                </span>
+                            </div>
+                            
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-crosshairs text-gray-400"></i>
+                                <span class="text-sm text-gray-600">Targets:</span>
+                                <div class="flex flex-wrap gap-1">
+                                    {% for target in event.targets %}
+                                    <span class="inline-flex items-center px-2 py-1 rounded bg-gray-100 text-gray-700 text-xs">
+                                        {{ target }}
+                                    </span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-2">
+                            <form method="post" action="/account/{{ account.id }}/events/{{ event.id }}/delete" class="inline"
+                                  onsubmit="return confirm('Apakah Anda yakin ingin menghapus event ini?')">
+                                <button type="submit" class="text-red-600 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-12">
+                <div class="h-24 w-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-bolt text-gray-400 text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Belum ada events</h3>
+                <p class="text-gray-600 mb-6">Tambahkan event pertama untuk mulai menerima notifikasi webhook</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Webhook Status -->
+        <div class="mt-8 bg-white rounded-xl shadow-sm p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                <i class="fas fa-webhook mr-2 text-gray-600"></i>Status Webhook
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="p-4 border rounded-lg">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-medium text-gray-900">
+                            <i class="fas fa-flask mr-2 text-yellow-500"></i>Test Environment
+                        </h4>
+                        {% if account.webhooks.test %}
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            <i class="fas fa-check mr-1"></i>Configured
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            <i class="fas fa-times mr-1"></i>Not Set
+                        </span>
+                        {% endif %}
+                    </div>
+                    {% if account.webhooks.test %}
+                    <p class="text-sm text-gray-600 mb-2">{{ account.webhooks.test[:50] }}...</p>
+                    <button 
+                        onclick="testWebhook('{{ account.webhooks.test }}')"
+                        class="text-sm bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded font-medium transition-colors"
+                    >
+                        <i class="fas fa-play mr-1"></i>Test
+                    </button>
+                    {% else %}
+                    <p class="text-sm text-gray-500 mb-2">URL webhook belum dikonfigurasi</p>
+                    <a href="/account/{{ account.id }}/edit" class="text-sm text-blue-600 hover:text-blue-700">
+                        <i class="fas fa-cog mr-1"></i>Konfigurasi
+                    </a>
+                    {% endif %}
+                </div>
+                
+                <div class="p-4 border rounded-lg">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-medium text-gray-900">
+                            <i class="fas fa-rocket mr-2 text-green-500"></i>Production Environment
+                        </h4>
+                        {% if account.webhooks.production %}
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            <i class="fas fa-check mr-1"></i>Configured
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            <i class="fas fa-times mr-1"></i>Not Set
+                        </span>
+                        {% endif %}
+                    </div>
+                    {% if account.webhooks.production %}
+                    <p class="text-sm text-gray-600 mb-2">{{ account.webhooks.production[:50] }}...</p>
+                    <button 
+                        onclick="testWebhook('{{ account.webhooks.production }}')"
+                        class="text-sm bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded font-medium transition-colors"
+                    >
+                        <i class="fas fa-play mr-1"></i>Test
+                    </button>
+                    {% else %}
+                    <p class="text-sm text-gray-500 mb-2">URL webhook belum dikonfigurasi</p>
+                    <a href="/account/{{ account.id }}/edit" class="text-sm text-blue-600 hover:text-blue-700">
+                        <i class="fas fa-cog mr-1"></i>Konfigurasi
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

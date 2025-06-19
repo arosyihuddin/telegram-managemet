@@ -9,7 +9,7 @@ from app.core.telegram_manager import TelegramManager
 from app.utils.logger import logger
 
 app = FastAPI(title="Telegram Management System", version="1.0.0")
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# app.mount("/static", StaticFiles(directory="static"), name="static")
 # Add session middleware
 app.add_middleware(
     SessionMiddleware, secret_key=os.getenv("SECRET_KEY", "your-secret-key-here")

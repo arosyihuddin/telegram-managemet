@@ -44,9 +44,9 @@ class ConfigManager:
         config = await ConfigManager.load_config()
         account_id = str(uuid.uuid4())
         account_data["id"] = account_id
+        account_data["connected"] = True
         account_data["created_at"] = datetime.now().isoformat()
         config["accounts"].append(account_data)
-        print(config)
         await ConfigManager.save_config(config)
         return account_id
 

@@ -155,11 +155,33 @@ async def edit_account(
 async def delete_account(
     account_id: str, current_user: str = Depends(get_current_user)
 ):
-    success = await ConfigManager.delete_account(account_id)
-    if success:
-        return RedirectResponse(url="/dashboard", status_code=302)
-    else:
+    # 1. Cek akun dulu → ambil semua data yang diperlukan sebelum mulai operasi
+    config = await ConfigManager.load_config()
+    account = next((acc for acc in config["accounts"] if acc["id"] == account_id), None)
+    if not account:
         raise HTTPException(status_code=404, detail="Account not found")
+
+    # 2. Simpan snapshot config sebelum dihapus → untuk rollback jika gagal hapus session
+    original_config = config.copy()
+
+    try:
+        success_config = await ConfigManager.delete_account(account_id)
+        if not success_config:
+            raise Exception("Failed to delete account config")
+
+        success_session = await TelegramManager.delete_session(
+            account["api_id"], account["phone"]
+        )
+        if not success_session:
+            # Rollback config → akun dikembalikan
+            await ConfigManager.save_config(original_config)
+            raise Exception("Failed to delete session file")
+
+        return RedirectResponse(url="/dashboard", status_code=302)
+
+    except Exception as e:
+        logger.error(f"Delete account failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Delete failed: {e}")
 
 
 @router.get("/account/{account_id}/events", response_class=HTMLResponse)
@@ -240,16 +262,19 @@ async def api_get_accounts(current_user: str = Depends(get_current_user)):
     return {"accounts": config["accounts"]}
 
 
-@router.get("/api/account/{account_id}/status")
+@router.get("/account/{account_id}/status")
 async def api_account_status(
     account_id: str, current_user: str = Depends(get_current_user)
 ):
-    account = await ConfigManager.get_account(account_id)
+    config = await ConfigManager.load_config()
+    account = next((acc for acc in config["accounts"] if acc["id"] == account_id), None)
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
 
-    connected = await TelegramManager.test_connection(account)
-    return {"connected": connected}
+    connected = await TelegramManager.refresh(account)
+    account["connected"] = True
+    await ConfigManager.save_config(config)
+    return RedirectResponse("/dashboard", status_code=303)
 
 
 @router.post("/account/{account_id}/connect")
@@ -258,13 +283,6 @@ async def connect_account(account_id: str):
     account = next((acc for acc in config["accounts"] if acc["id"] == account_id), None)
     if not account:
         raise HTTPException(status_code=404, detail="Akun tidak ditemukan")
-
-    # await TelegramManager.get_client(
-    #     account["api_id"],
-    #     account["api_hash"],
-    #     account["phone"],
-    #     account.get("session_string"),
-    # )
 
     await TelegramManager.start_event_listener(account)
     account["connected"] = True
@@ -279,7 +297,10 @@ async def disconnect_account(account_id: str):
     if not account:
         raise HTTPException(status_code=404, detail="Akun tidak ditemukan")
 
-    await TelegramManager.close_client(account["api_id"], account["phone"])
+    await TelegramManager.close_client(
+        account["api_id"], account["api_hash"], account["phone"]
+    )
+    # await TelegramManager.close_client(account["api_id"], account["phone"])
     account["connected"] = False
     await ConfigManager.save_config(config)
     return RedirectResponse("/dashboard", status_code=303)

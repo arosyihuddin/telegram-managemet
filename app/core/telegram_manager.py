@@ -28,6 +28,8 @@ class TelegramManager:
                     api_hash=api_hash,
                     session_string=session_string,
                 )
+                await client.start()
+                TelegramManager.clients[key] = client
             else:
                 SESSIONS_DIR = os.path.join(os.getcwd(), "sessions")
                 os.makedirs(SESSIONS_DIR, exist_ok=True)
@@ -37,9 +39,8 @@ class TelegramManager:
                     api_id=int(api_id),
                     api_hash=api_hash,
                 )
-
-            await client.connect()
-            TelegramManager.clients[key] = client
+                await client.connect()
+                TelegramManager.clients[key] = client
 
         else:
             client = TelegramManager.clients[key]
@@ -49,11 +50,24 @@ class TelegramManager:
         return TelegramManager.clients[key]
 
     @staticmethod
-    async def close_client(api_id: str, phone: str):
+    async def close_client(api_id: str, api_hash: str, phone: str):
+
         key = f"{api_id}:{phone}"
-        client = TelegramManager.clients.pop(key, None)
+        # Ambil dari cache jika ada, jangan connect baru saat close
+        client = TelegramManager.clients.get(key)
+
         if client:
-            await client.stop()
+            print(f"[{key}] Connected: {client.is_connected}")
+            try:
+                if client.is_connected:
+                    await client.stop()
+            except ConnectionError as e:
+                print(f"[{key}] Client already terminated: {e}")
+
+            # Bersihkan dari dict agar tidak ada session zombie
+            TelegramManager.clients.pop(key, None)
+        else:
+            print(f"[{key}] No client instance found, possibly already closed.")
 
     @staticmethod
     async def send_code(api_id: str, api_hash: str, phone: str) -> Dict[str, Any]:
@@ -111,7 +125,7 @@ class TelegramManager:
             return {"success": False, "error": str(e)}
 
     @staticmethod
-    async def test_connection(account: Dict[str, Any]) -> bool:
+    async def refresh(account: Dict[str, Any]) -> bool:
         """Test Telegram account connection"""
         try:
             await TelegramManager.start_event_listener(account)
@@ -143,7 +157,7 @@ class TelegramManager:
                 )
                 return
 
-            logger.debug(f"Targets: {all_targets}")
+            logger.info(f"Targets: {all_targets}")
 
             @client.on_message(filters.chat(all_targets))
             async def handle_new_message(client, message: Message):
@@ -160,3 +174,31 @@ class TelegramManager:
 
         except Exception as e:
             logger.error(f"Error starting event listener: {e}")
+
+    @staticmethod
+    async def delete_session(api_id: str, phone: str):
+        try:
+            key = f"{api_id}:{phone}"
+            SESSIONS_DIR = os.path.join(os.getcwd(), "sessions")
+            session_file = os.path.join(SESSIONS_DIR, key)
+
+            # Hapus juga file ".session-journal" kalau ada
+            journal_file = session_file + "-journal"
+
+            # Pastikan sudah di-close dulu
+            client = TelegramManager.clients.pop(key, None)
+            if client and client.is_connected:
+                await client.stop()
+
+            if os.path.exists(session_file):
+                os.remove(session_file)
+                logger.info(f"[{key}] Session file deleted.")
+
+            if os.path.exists(journal_file):
+                os.remove(journal_file)
+                logger.info(f"[{key}] Session journal file deleted.")
+
+            return True
+        except Exception as e:
+            logger.error(f"Error deleting session: {e}")
+            return False

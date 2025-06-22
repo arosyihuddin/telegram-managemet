@@ -1,175 +1,199 @@
-{% extends "base.html" %}
-
-{% block title %}Edit Akun - Telegram Management{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% block title %}Edit Akun - Telegram Management{%
+endblock %} {% block content %}
 <div class="min-h-screen bg-gray-50">
-    <!-- Navigation Header -->
-    <nav class="bg-white shadow-sm border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center">
-                    <a href="/dashboard" class="h-8 w-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center mr-3">
-                        <i class="fab fa-telegram-plane text-white text-sm"></i>
-                    </a>
-                    <h1 class="text-xl font-semibold text-gray-900">Edit Akun: {{ account.name }}</h1>
-                </div>
-                <a href="/dashboard" class="text-gray-600 hover:text-gray-900">
-                    <i class="fas fa-arrow-left mr-2"></i>Kembali
-                </a>
-            </div>
+  <!-- Navigation Header -->
+  <nav class="bg-white shadow-sm border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex items-center">
+          <a
+            href="/dashboard"
+            class="h-8 w-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center mr-3"
+          >
+            <i class="fab fa-telegram-plane text-white text-sm"></i>
+          </a>
+          <h1 class="text-xl font-semibold text-gray-900">
+            Edit Akun: {{ account.name }}
+          </h1>
         </div>
-    </nav>
-
-    <!-- Main Content -->
-    <div class="max-w-2xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <div class="bg-white rounded-xl shadow-sm p-8 animate-fade-in">
-            {% if error %}
-            <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <div class="flex items-center">
-                    <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
-                    <span class="text-red-700">{{ error }}</span>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Account Info Card -->
-            <div class="mb-8 p-6 bg-gray-50 border border-gray-200 rounded-lg">
-                <div class="flex items-center">
-                    <div class="h-12 w-12 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
-                        <span class="text-white font-medium">
-                            {{ account.user_info.first_name[0] if account.user_info.first_name else account.name[0] }}
-                        </span>
-                    </div>
-                    <div class="ml-4">
-                        <h3 class="text-lg font-semibold text-gray-900">{{ account.name }}</h3>
-                        <p class="text-gray-600">{{ account.phone }}</p>
-                        {% if account.user_info %}
-                        <p class="text-sm text-gray-500">
-                            {{ account.user_info.first_name }} {{ account.user_info.last_name or '' }}
-                            {% if account.user_info.username %}(@{{ account.user_info.username }}){% endif %}
-                        </p>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <form method="post" action="/account/{{ account.id }}/edit" class="space-y-6">
-                <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-tag mr-2 text-gray-400"></i>Nama Akun
-                    </label>
-                    <input 
-                        type="text" 
-                        name="name" 
-                        id="name" 
-                        value="{{ account.name }}" 
-                        required 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                        placeholder="Nama untuk mengidentifikasi akun ini"
-                    >
-                </div>
-
-                <div class="space-y-6">
-                    <h4 class="text-lg font-semibold text-gray-900 flex items-center">
-                        <i class="fas fa-webhook mr-2 text-gray-600"></i>Konfigurasi Webhook
-                    </h4>
-
-                    <div>
-                        <label for="webhook_test" class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-flask mr-2 text-yellow-500"></i>Webhook Test
-                        </label>
-                        <div class="flex space-x-2">
-                            <input 
-                                type="url" 
-                                name="webhook_test" 
-                                id="webhook_test" 
-                                value="{{ account.webhooks.test or '' }}" 
-                                class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                placeholder="https://your-test-domain.com/webhook"
-                            >
-                            <button 
-                                type="button"
-                                onclick="testWebhook(document.getElementById('webhook_test').value)"
-                                class="px-4 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-medium transition-colors"
-                            >
-                                <i class="fas fa-play"></i>
-                            </button>
-                        </div>
-                        <p class="text-xs text-gray-500 mt-1">URL untuk testing webhook development</p>
-                    </div>
-
-                    <div>
-                        <label for="webhook_production" class="block text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-rocket mr-2 text-green-500"></i>Webhook Production
-                        </label>
-                        <div class="flex space-x-2">
-                            <input 
-                                type="url" 
-                                name="webhook_production" 
-                                id="webhook_production" 
-                                value="{{ account.webhooks.production or '' }}" 
-                                class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                placeholder="https://your-production-domain.com/webhook"
-                            >
-                            <button 
-                                type="button"
-                                onclick="testWebhook(document.getElementById('webhook_production').value)"
-                                class="px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-colors"
-                            >
-                                <i class="fas fa-play"></i>
-                            </button>
-                        </div>
-                        <p class="text-xs text-gray-500 mt-1">URL untuk webhook production</p>
-                    </div>
-                </div>
-
-                <!-- Webhook Info -->
-                <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div class="flex items-start">
-                        <i class="fas fa-info-circle text-blue-500 mr-2 mt-0.5"></i>
-                        <div class="text-sm text-blue-700">
-                            <p class="font-medium mb-1">Tentang Webhook</p>
-                            <p>Webhook adalah URL yang akan menerima data event dari akun Telegram ini. Pastikan server endpoint Anda siap menerima HTTP POST request dengan payload JSON.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex space-x-4 pt-6">
-                    <button 
-                        type="submit" 
-                        class="flex-1 btn-primary text-white py-3 px-6 rounded-lg font-medium shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200"
-                    >
-                        <i class="fas fa-save mr-2"></i>Simpan Perubahan
-                    </button>
-                    <a 
-                        href="/dashboard" 
-                        class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200"
-                    >
-                        <i class="fas fa-times mr-2"></i>Batal
-                    </a>
-                </div>
-            </form>
-
-            <!-- Quick Actions -->
-            <div class="mt-8 pt-6 border-t border-gray-200">
-                <h4 class="text-sm font-medium text-gray-900 mb-4">Aksi Cepat</h4>
-                <div class="flex space-x-3">
-                    <a 
-                        href="/account/{{ account.id }}/events" 
-                        class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition-colors"
-                    >
-                        <i class="fas fa-list mr-1"></i>Kelola Events
-                    </a>
-                    <button 
-                        onclick="checkConnectionStatus('{{ account.id }}')"
-                        class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
-                    >
-                        <i class="fas fa-sync mr-1"></i>Test Koneksi
-                    </button>
-                </div>
-            </div>
-        </div>
+        <a href="/dashboard" class="text-gray-600 hover:text-gray-900">
+          <i class="fas fa-arrow-left mr-2"></i>Kembali
+        </a>
+      </div>
     </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="max-w-2xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <div class="bg-white rounded-xl shadow-sm p-8 animate-fade-in">
+      {% if error %}
+      <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+        <div class="flex items-center">
+          <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+          <span class="text-red-700">{{ error }}</span>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Account Info Card -->
+      <div class="mb-8 p-6 bg-gray-50 border border-gray-200 rounded-lg">
+        <div class="flex items-center">
+          <div
+            class="h-12 w-12 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full flex items-center justify-center"
+          >
+            <span class="text-white font-medium">
+              {{ account.user_info.first_name[0] if account.user_info.first_name
+              else account.name[0] }}
+            </span>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-lg font-semibold text-gray-900">
+              {{ account.name }}
+            </h3>
+            <p class="text-gray-600">{{ account.phone }}</p>
+            {% if account.user_info %}
+            <p class="text-sm text-gray-500">
+              {{ account.user_info.first_name }} {{ account.user_info.last_name
+              or '' }} {% if account.user_info.username %}(@{{
+              account.user_info.username }}){% endif %}
+            </p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <form
+        method="post"
+        action="/account/{{ account.id }}/edit"
+        class="space-y-6"
+      >
+        <div>
+          <label
+            for="name"
+            class="block text-sm font-medium text-gray-700 mb-2"
+          >
+            <i class="fas fa-tag mr-2 text-gray-400"></i>Nama Akun
+          </label>
+          <input
+            type="text"
+            name="name"
+            id="name"
+            value="{{ account.name }}"
+            required
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+            placeholder="Nama untuk mengidentifikasi akun ini"
+          />
+        </div>
+
+        <div class="space-y-6">
+          <h4 class="text-lg font-semibold text-gray-900 flex items-center">
+            <i class="fas fa-webhook mr-2 text-gray-600"></i>Konfigurasi Webhook
+          </h4>
+
+          <div>
+            <label
+              for="webhook_test"
+              class="block text-sm font-medium text-gray-700 mb-2"
+            >
+              <i class="fas fa-flask mr-2 text-yellow-500"></i>Webhook Test
+            </label>
+            <div class="flex space-x-2">
+              <input
+                type="url"
+                name="webhook_test"
+                id="webhook_test"
+                value="{{ account.webhooks.test or '' }}"
+                class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                placeholder="https://your-test-domain.com/webhook"
+              />
+              <button
+                type="button"
+                onclick="testWebhook(document.getElementById('webhook_test').value)"
+                class="px-4 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-medium transition-colors"
+              >
+                <i class="fas fa-play"></i>
+              </button>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">
+              URL untuk testing webhook development
+            </p>
+          </div>
+
+          <div>
+            <label
+              for="webhook_production"
+              class="block text-sm font-medium text-gray-700 mb-2"
+            >
+              <i class="fas fa-rocket mr-2 text-green-500"></i>Webhook
+              Production
+            </label>
+            <div class="flex space-x-2">
+              <input
+                type="url"
+                name="webhook_production"
+                id="webhook_production"
+                value="{{ account.webhooks.production or '' }}"
+                class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                placeholder="https://your-production-domain.com/webhook"
+              />
+              <button
+                type="button"
+                onclick="testWebhook(document.getElementById('webhook_production').value)"
+                class="px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-colors"
+              >
+                <i class="fas fa-play"></i>
+              </button>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">
+              URL untuk webhook production
+            </p>
+          </div>
+        </div>
+
+        <!-- Webhook Info -->
+        <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div class="flex items-start">
+            <i class="fas fa-info-circle text-blue-500 mr-2 mt-0.5"></i>
+            <div class="text-sm text-blue-700">
+              <p class="font-medium mb-1">Tentang Webhook</p>
+              <p>
+                Webhook adalah URL yang akan menerima data event dari akun
+                Telegram ini. Pastikan server endpoint Anda siap menerima HTTP
+                POST request dengan payload JSON.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex space-x-4 pt-6">
+          <button
+            type="submit"
+            class="flex-1 btn-primary text-white py-3 px-6 rounded-lg font-medium shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200"
+          >
+            <i class="fas fa-save mr-2"></i>Simpan Perubahan
+          </button>
+          <a
+            href="/dashboard"
+            class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200"
+          >
+            <i class="fas fa-times mr-2"></i>Batal
+          </a>
+        </div>
+      </form>
+
+      <!-- Quick Actions -->
+      <div class="mt-8 pt-6 border-t border-gray-200">
+        <h4 class="text-sm font-medium text-gray-900 mb-4">Aksi Cepat</h4>
+        <div class="flex space-x-3">
+          <a
+            href="/account/{{ account.id }}/events"
+            class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition-colors"
+          >
+            <i class="fas fa-list mr-1"></i>Kelola Events
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

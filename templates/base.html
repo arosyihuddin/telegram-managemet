@@ -1,146 +1,160 @@
 <!DOCTYPE html>
 <html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}Telegram Management{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script
+      src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"
+      defer
+    ></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        
-        .animate-fade-in {
-            animation: fadeIn 0.5s ease-in-out;
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+      body {
+        font-family: "Inter", sans-serif;
+      }
+
+      .animate-fade-in {
+        animation: fadeIn 0.5s ease-in-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
         }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
-        
-        .card-hover {
-            transition: all 0.3s ease;
+      }
+
+      .card-hover {
+        transition: all 0.3s ease;
+      }
+
+      .card-hover:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+          0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        transition: all 0.3s ease;
+      }
+
+      .btn-primary:hover {
+        background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+        transform: translateY(-1px);
+      }
+
+      .loading-spinner {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #3b82f6;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
         }
-        
-        .card-hover:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        100% {
+          transform: rotate(360deg);
         }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #1D4ED8 0%, #1E40AF 100%);
-            transform: translateY(-1px);
-        }
-        
-        .loading-spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3B82F6;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+      }
     </style>
-</head>
-<body class="bg-gray-50 min-h-screen">
+  </head>
+  <body class="bg-gray-50 min-h-screen">
     {% block content %}{% endblock %}
-    
+
     <!-- Global JavaScript -->
     <script>
-        // Utility functions
-        function showNotification(message, type = 'success') {
-            const notification = document.createElement('div');
-            notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 animate-fade-in ${
-                type === 'success' ? 'bg-green-500 text-white' : 
-                type === 'error' ? 'bg-red-500 text-white' : 
-                'bg-blue-500 text-white'
-            }`;
-            notification.innerHTML = `
+      // Utility functions
+      function showNotification(message, type = "success") {
+        const notification = document.createElement("div");
+        notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 animate-fade-in ${
+          type === "success"
+            ? "bg-green-500 text-white"
+            : type === "error"
+            ? "bg-red-500 text-white"
+            : "bg-blue-500 text-white"
+        }`;
+        notification.innerHTML = `
                 <div class="flex items-center">
-                    <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'} mr-2"></i>
+                    <i class="fas ${
+                      type === "success"
+                        ? "fa-check-circle"
+                        : type === "error"
+                        ? "fa-exclamation-circle"
+                        : "fa-info-circle"
+                    } mr-2"></i>
                     <span>${message}</span>
                 </div>
             `;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.remove();
-            }, 5000);
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+          notification.remove();
+        }, 5000);
+      }
+
+      function showLoading(element) {
+        const originalText = element.innerHTML;
+        element.innerHTML =
+          '<div class="loading-spinner inline-block mr-2"></div>Loading...';
+        element.disabled = true;
+        return originalText;
+      }
+
+      function hideLoading(element, originalText) {
+        element.innerHTML = originalText;
+        element.disabled = false;
+      }
+
+      // Test webhook function
+      async function testWebhook(url) {
+        if (!url) {
+          showNotification("URL webhook tidak boleh kosong", "error");
+          return;
         }
-        
-        function showLoading(element) {
-            const originalText = element.innerHTML;
-            element.innerHTML = '<div class="loading-spinner inline-block mr-2"></div>Loading...';
-            element.disabled = true;
-            return originalText;
+
+        const button = event.target;
+        const originalText = showLoading(button);
+
+        try {
+          const formData = new FormData();
+          formData.append("webhook_url", url);
+
+          const response = await fetch("/webhook/test", {
+            method: "POST",
+            body: formData,
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            showNotification("Webhook test berhasil!", "success");
+          } else {
+            showNotification(
+              `Webhook test gagal: ${result.error || "Unknown error"}`,
+              "error"
+            );
+          }
+        } catch (error) {
+          showNotification(`Error: ${error.message}`, "error");
+        } finally {
+          hideLoading(button, originalText);
         }
-        
-        function hideLoading(element, originalText) {
-            element.innerHTML = originalText;
-            element.disabled = false;
-        }
-        
-        // Test webhook function
-        async function testWebhook(url) {
-            if (!url) {
-                showNotification('URL webhook tidak boleh kosong', 'error');
-                return;
-            }
-            
-            const button = event.target;
-            const originalText = showLoading(button);
-            
-            try {
-                const formData = new FormData();
-                formData.append('webhook_url', url);
-                
-                const response = await fetch('/webhook/test', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    showNotification('Webhook test berhasil!', 'success');
-                } else {
-                    showNotification(`Webhook test gagal: ${result.error || 'Unknown error'}`, 'error');
-                }
-            } catch (error) {
-                showNotification(`Error: ${error.message}`, 'error');
-            } finally {
-                hideLoading(button, originalText);
-            }
-        }
-        
-        // Check connection status
-        async function checkConnectionStatus(accountId) {
-            try {
-                const response = await fetch(`/api/account/${accountId}/status`);
-                const result = await response.json();
-                
-                const statusElement = document.getElementById(`status-${accountId}`);
-                if (statusElement) {
-                    statusElement.innerHTML = result.connected ? 
-                        '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"><i class="fas fa-check-circle mr-1"></i>Connected</span>' :
-                        '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800"><i class="fas fa-times-circle mr-1"></i>Disconnected</span>';
-                }
-            } catch (error) {
-                console.error('Error checking connection:', error);
-            }
-        }
+      }
     </script>
-</body>
+  </body>
 </html>
